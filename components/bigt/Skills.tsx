@@ -47,6 +47,46 @@ const reviews = [
     body: "I wish I learn't this before suffering with MySQL queries. :-)",
     img: "https://www.prisma.io/images/apple-touch-icon.png",
   },
+  {
+    name: "MongoDB",
+    body: "Used it for few days, then I discovered Prisma",
+    img: "https://www.mongodb.com/favicon.ico"
+  },
+  {
+    name: "TamperMonkey",
+    body: "Used it to automate many tasks in various websites.",
+    img: "https://www.tampermonkey.net/favicon.ico"
+  },
+  {
+    name: "TypeScript",
+    body: "Beginner in it. But getting there",
+    img: "https://www.typescriptlang.org/favicon.ico"
+  },
+  {
+    name: "TailwindCSS",
+    body: "Using it since I started using React.",
+    img: "https://tailwindcss.com/favicons/favicon-32x32.png?v=3"
+  },
+  {
+    name: "Netlify",
+    body: "Using it to deploy frontends",
+    img: "https://www.netlify.com/favicon/favicon.ico"
+  },
+  {
+    name: "Linux",
+    body: "I used to use Debian based OS as a daily driver for about 4 years.",
+    img: "https://upload.wikimedia.org/wikipedia/commons/3/35/Tux.svg"
+  },
+  {
+    name: "Vercel",
+    body: "Using it to ship mainly my backends but also ship some frontends from it.",
+    img: "https://vercel.com/favicon.ico"
+  },
+  {
+    name: "Postman",
+    body: "Use it daily to document, test or reverse engineer web APIs",
+    img: "/logos/postman.png"
+  }
 ];
 
 const firstRow = reviews.slice(0, reviews.length / 2);
@@ -72,7 +112,7 @@ const ReviewCard = ({
       )}
     >
       <div className="flex flex-row items-center gap-2">
-        <img className="rounded-full" width="32" height="32" alt="" src={img} />
+        <img width="32" height="32" alt="" src={img} />
         <div className="flex flex-col">
           <figcaption className="text-sm font-medium dark:text-white">
             {name}
@@ -87,7 +127,7 @@ const ReviewCard = ({
 export function Skills() {
   return (
     <div className="relative flex py-8 w-full flex-col items-center justify-center overflow-hidden rounded-lg border bg-background md:shadow-xl">
-      <h2 className="text-2xl text-center mb-2">Skills</h2>
+      <h2 className="text-2xl text-center mb-2">Techs I Use</h2>
       <Marquee pauseOnHover className="[--duration:20s]">
         {firstRow.map((review) => (
           <ReviewCard key={review.name} {...review} />
