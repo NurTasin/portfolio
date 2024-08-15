@@ -11,7 +11,7 @@ import {
   } from "@nextui-org/navbar";
 import Link from "next/link";
 
-export default function App() {
+export default function CustomNavbar() {
     const [isMenuOpen, setIsMenuOpen] = React.useState(false);
 
     const menuItems = [
@@ -58,7 +58,7 @@ export default function App() {
             </NavbarContent>
             <NavbarContent justify="end">
                 <NavbarItem className="hidden lg:flex">
-                    <Link href="#">Login</Link>
+                    <Link href="/blog">Blogs</Link>
                 </NavbarItem>
                 <NavbarItem>
                     {/* <Button as={Link} color="primary" href="#" variant="flat">

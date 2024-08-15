@@ -18,7 +18,7 @@ export default function RootLayout({
   return (
     <html lang="en" className="dark">
       <body className={`${inter.className} min-h-[100vh] w-[100vw] overflow-x-hidden`}>
-        <Navbar/>
+        <Navbar />
         {children}
       </body>
     </html>

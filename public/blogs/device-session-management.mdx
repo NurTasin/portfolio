@@ -1,0 +1,368 @@
+---
+title: How to manage your user session in express and react
+author: Nur Mahmud Tasin
+---
+## Database Tables
+![Image Loading Failed](./docs/images/db_tables.png)
+The schema file could be found at `server/prisma/schema.prisma` file
+## Endpoints
+The following documentation will describe how every endpoints behave in server-side application.
+
+A detailed PostMan Collection could be found [here](./docs/postman_collection/user-session-management.postman_collection.json).
+### Authentication Endpoints
+#### Register
+> POST `/auth/register`
+
+_Request_ Payload
+```json
+{
+    "username":"elonmask",
+    "first_name":"Elon",
+    "last_name":"Mask",
+    "email":"elonmusk@dogecoin.com",
+    "password":"dogecoin_rocks",
+    "phone_number":"01XXXXXXXXX",
+    "gender":"Male"
+}
+```
+_Response_ data
+```json
+{
+    "id": "704344fb-72a7-41b3-8d62-267f1a7117db",
+    "username": "elonmask",
+    "first_name": "Elon",
+    "last_name": "Mask",
+    "email": "elonmusk@dogecoin.com",
+    "is_verified": false,
+    "password_hash": "$2b$10$qyTQPEFa9IrsLe9A7uj8KOOkmenH/WRwVcee9KMVjU0nBbPkqTaUG",
+    "phone_number": "01XXXXXXXXX",
+    "devices_connected": 0,
+    "created_at": "2024-05-25T07:00:29.258Z",
+    "updated_at": "2024-05-25T07:00:29.258Z",
+    "last_logged_in": "2024-05-25T07:00:29.258Z",
+    "profile_picture_url": null,
+    "country_code": "BD",
+    "gender": "Male"
+}
+```
+#### Login
+> POST `/auth/login`
+
+_Request_ payload
+```json
+{
+    "username":"elonmusk",
+    "password":"dogecoin_rocks"
+}
+```
+Once the login is successful, a cookie named `token` will be set to the user's browser with a jwt in it
+
+JWT Token contains the following fields
+```json
+{
+  "userId": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+  "deviceId": "1fc78ba7-1345-4777-a68f-051b07d07fc8",
+  "iat": 1716619905, // Time of token creation
+  "exp": 1748155905 // Expires after 365 days
+}
+```
+
+_Response_ data (`200`, Success)
+```json
+{
+    "error": false,
+    "msg": "Logged in successfully.",
+    "user": {
+        "id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+        "username": "elonmusk",
+        "first_name": "Elon",
+        "last_name": "Musk",
+        "profile_picture_url": null,
+        "email": "elonmusk@dogecoin.com",
+        "is_verified": "elonmusk@dogecoin.com",
+        "phone_number": "01XXXXXXXXX",
+        "devices_connected": 5,
+        "gender": "Male",
+        "country_code": "BD"
+    },
+    "thisDevice": {
+        "id": "83b56250-0f32-4567-a42d-1c26babad3ba",
+        "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+        "device_name": "Chrome Mobile 112.0.0.0 on SM-S901B (Android 13)",
+        "device_os": "Android 13",
+        "last_logged_in": "2024-05-25T07:05:08.842Z"
+    }
+}
+```
+_Response_ data (`401`, Wrong Credentials)
+```json
+{
+    "error": true,
+    "msg": "Username or password didn't match"
+}
+```
+_Response_ data (`421`, Too Many Device)
+```json
+{
+    "error": true,
+    "msg": "Maximum user device logged in",
+    "devices": [
+        {
+            "id": "172737bf-08f0-4c14-8124-af73e1ffd137",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome",
+            "device_os": "Linux 64-bit",
+            "last_logged_in": "2024-05-25T06:46:19.948Z"
+        },
+        {
+            "id": "1b8b30cf-895b-49e1-9c7b-be558d8ad24b",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome Mobile",
+            "device_os": "Android 13",
+            "last_logged_in": "2024-05-25T06:50:23.399Z"
+        },
+        {
+            "id": "1fc78ba7-1345-4777-a68f-051b07d07fc8",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome Mobile 112.0.0.0 on SM-S901B (Android 13)",
+            "device_os": "Android 13",
+            "last_logged_in": "2024-05-25T06:51:45.620Z"
+        },
+        {
+            "id": "7f44be3b-bb74-470b-9306-da1eeebf44b8",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome Mobile",
+            "device_os": "Android 13",
+            "last_logged_in": "2024-05-25T06:48:05.293Z"
+        }
+    ]
+}
+```
+
+#### Logout
+> GET `/auth/logout`
+
+To logout a client must have the `token` in their cookies. This `token` will be used to get the userId and deviceId for the device to logout successfully.
+
+_Response_ data (`200`, Success)
+```json
+{
+    "error": false,
+    "msg": "Logout Successful"
+}
+```
+If the endpoint is hit with a request that doesn't have the `token` cookie, as a response `HTTP 400` `Bad Request` is sent
+
+_Response_ data (`400`, Bad Request)
+```json
+{
+    "error": true,
+    "msg": "Bad Request"
+}
+```
+If the token is expired, a `HTTP 401` `Unauthorized` Error is sent.
+
+_Response_ data (`401`, Token Expired)
+```json
+{
+    "error": true,
+    "msg": "Token Expired"
+}
+``` 
+### Device Endpoints
+#### List Devices
+> GET `/devices/list`
+
+Returns the list of currently registered device under that specific user. UserID is taken from the `token` cookie.
+
+_Response_ data (`200`, Success)
+```json
+{
+    "error": false,
+    "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+    "total_device": 3,
+    "device_list": [
+        {
+            "id": "1b8b30cf-895b-49e1-9c7b-be558d8ad24b",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome Mobile",
+            "device_os": "Android 13",
+            "last_logged_in": "2024-05-25T06:50:23.399Z"
+        },
+        {
+            "id": "1fc78ba7-1345-4777-a68f-051b07d07fc8",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome Mobile 112.0.0.0 on SM-S901B (Android 13)",
+            "device_os": "Android 13",
+            "last_logged_in": "2024-05-25T06:51:45.620Z"
+        },
+        {
+            "id": "7f44be3b-bb74-470b-9306-da1eeebf44b8",
+            "user_id": "0169ee76-6d76-47a8-b7a9-03cf3b79d66a",
+            "device_name": "Chrome Mobile",
+            "device_os": "Android 13",
+            "last_logged_in": "2024-05-25T06:48:05.293Z"
+        }
+    ]
+}
+```
+If the endpoint is hit with a request that doesn't have the `token` cookie, as a response `HTTP 400` `Bad Request` is sent
+
+_Response_ data (`400`, Bad Request)
+```json
+{
+    "error": true,
+    "msg": "Bad Request"
+}
+```
+If the token is expired, a `HTTP 401` `Unauthorized` Error is sent.
+
+_Response_ data (`401`, Token Expired)
+```json
+{
+    "error": true,
+    "msg": "Token Expired"
+}
+```
+#### Remove Device
+> DELETE `/devices/remove/<device_uuid>`
+
+This endpoint is used to disconnect a particular device (except the device is sending this request). It is helpful when the `Maximum Login Device Limit` is hit. For authentiation, the jwt from `token` cookie is used.
+
+_Response_ data (`200`, Success)
+```json
+{
+    "error": true,
+    "msg": "Device Deleted from the access list"
+}
+```
+If the requested deviceId is same as the deviceId of the device sending the request, an error is thrown as this could lead to some uncontrolled behavior of the server application as well as the client app.
+
+_Response_ data (`400`, Self Deletion Error)
+```json
+{
+    "error": true,
+    "msg": "Can't remove this device! Try logging out."
+}
+```
+If the endpoint is hit with a request that doesn't have the `token` cookie, as a response `HTTP 400` `Bad Request` is sent
+
+_Response_ data (`400`, Bad Request)
+```json
+{
+    "error": true,
+    "msg": "Bad Request"
+}
+```
+If the token is expired, a `HTTP 401` `Unauthorized` Error is sent.
+
+_Response_ data (`401`, Token Expired)
+```json
+{
+    "error": true,
+    "msg": "Token Expired"
+}
+```
+### Session Management
+Sessions are used to monitor a user's daily watch time on a particular video (if videoId provided) or could be used to monitor user's daily activity time on the platform (if videoId not provided). 
+
+The overal flow chart is shown in the image
+
+![Image Loading Failed](./docs/images/session_management_diagram.png)
+Image file could be found at [`docs/images/session_management_diagram.png`](./docs/images/session_management_diagram.png)
+#### Create Session
+> GET `/session/init?videoId`
+##### Query parameters and their type
+| Query Name    | Type            | Description   |
+|:-------------:|:---------------:|:-------------:|
+| videoId       | null or String  | `Video ID` if want to log the time as streaming time too or `null` if only want to log the time as activity time |
+
+_Request_ payload
+```
+/session/init?videoId=9c9e9c1e-afad-4bce-bb5a-525368cafc28
+```
+_Response_ data
+```json
+{
+    "error": false,
+    "sessionId": "4"
+}
+```
+And on a successfully session creation two cookies will be set also
+- sessionId: Contains the session id for easy log mechanism for the client side
+- initTime: Actually it is the last log time. This is used to calculate how much time to add to the session time and/or active time.
+
+**Note**: If the endpoint is hit with `sessionId` and `initTime` cookies, that means that a previous session might be active before creating this new session. So in that case, server updates that previous session accordingly and then creates a new session.
+
+If the endpoint is hit with a request that doesn't have the `token` cookie, as a response `HTTP 400` `Bad Request` is sent
+
+_Response_ data (`400`, Bad Request)
+```json
+{
+    "error": true,
+    "msg": "Bad Request"
+}
+```
+If the token is expired, a `HTTP 401` `Unauthorized` Error is sent.
+
+_Response_ data (`401`, Token Expired)
+```json
+{
+    "error": true,
+    "msg": "Token Expired"
+}
+```
+
+#### Log Session
+> GET `/session/log`
+
+Required Cookies:
+- sessionId: The session Id to log at (automatically set on GET `/session/init` call)
+- initTime: Last time the log was at (automatically set on GET `/session/init` or updated on GET `/session/log` endpoint calls)
+
+_Response_ data (200, Success)
+```
+Success
+```
+If required `sessionId` and `initTime` are not sent with the request or no `token` is provided then a `400 Bad Request` is sent.
+_Response_ data (`400`, Bad Request)
+```json
+{
+    "error": true,
+    "msg": "Bad Request"
+}
+```
+If the token is expired, a `HTTP 401` `Unauthorized` Error is sent.
+
+_Response_ data (`401`, Token Expired)
+```json
+{
+    "error": true,
+    "msg": "Token Expired"
+}
+```
+## User Session Aggrigation
+It is expected to run a cron job every 4-6 hours or maybe every 24 hours to aggregate the users `Session` data and put it into a `Statistics` table.
+
+#### Cron Job Endpoint
+> GET `/cronjob/trigger?accessKey={accessKey}`
+
+`accessKey` query is there to authorize the aggregation process. By default `accessKey`=`secretcronjob`. But it is expected to change it in production environment.
+
+_Response_ data (`200`, Success)
+```json
+{
+  "error": false,
+  "msg": "Aggregated N Users"
+}
+```
+Here, **N** is total registered user to the platform
+
+If the `accessKey` provided doesn't match a `401 Unauthorized` code is sent.
+_Response_ Data (401, Unauthorized)
+```json
+{
+    "error": true,
+    "msg":"Unauthorized"
+}
+```
