@@ -57,7 +57,7 @@ const BlogCard = ({ blog }: { blog: BlogIndex }) => {
                         <div className="h-5 w-5 rounded-full bg-primary/20 p-1 text-primary">
                             <UserIcon className="h-full w-full" />
                         </div>
-                        <span>{blog.author}</span>
+                        <span>{blog.author} &middot; {new Date((blog.added_on * 1000) + (new Date().getTimezoneOffset() * 60000) ).toDateString()}</span>
                     </div>
                 </div>
             </div>

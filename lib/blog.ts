@@ -2,6 +2,8 @@ import { MDXRemoteSerializeResult } from "next-mdx-remote";
 import { serialize } from "next-mdx-remote/serialize";
 import rehypePrettyCode from "rehype-pretty-code";
 
+export const BLOG_URL = "https://raw.githubusercontent.com/NurTasin/blogs/main"
+
 const prettyCodeOptions = {
     theme: "one-dark-pro"
 }
@@ -10,7 +12,7 @@ export interface BlogIndex {
     title: string;
     slug: string;
     tags: string[];
-    added_on: string;
+    added_on: number;
     author: string;
     author_short: string;
     author_img: string;
@@ -19,7 +21,7 @@ export interface BlogIndex {
 }
 
 export async function getBlogMetadataBySlug(slug: string, onError: Function | undefined = undefined) {
-    const response = await fetch(`${process.env.URL}/blogs/index.json`,{cache:process.env.NODE_ENV==="production"?"default":"no-cache"});
+    const response = await fetch(`${BLOG_URL}/blogs/index.json`,{cache:process.env.NODE_ENV==="production"?"default":"no-cache"});
     const index: BlogIndex[] = await response.json() as BlogIndex[];
     for (const blog of index) {
         if (blog.slug === slug) {
@@ -30,7 +32,7 @@ export async function getBlogMetadataBySlug(slug: string, onError: Function | un
 }
 
 export async function getBlogContentBySlug(slug: string, onError: Function | undefined = undefined) {
-    const response = await fetch(`/blogs/${slug}.mdx`);
+    const response = await fetch(`${BLOG_URL}/blogs/raw/${slug}.mdx`);
     let renderedContent: MDXRemoteSerializeResult;
     if (response.status === 200) {
         const content = await response.text();

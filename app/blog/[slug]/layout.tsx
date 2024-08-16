@@ -32,7 +32,7 @@ const Layout = async ({ children, params }: Readonly<{
                             </Avatar>
                             <div className="grid gap-1 text-sm">
                                 <div className="font-medium">{metadata.author}</div>
-                                <div className="text-muted-foreground">Published on {metadata.added_on}</div>
+                                <div className="text-muted-foreground">Published on {new Date((metadata.added_on * 1000) + new Date().getTimezoneOffset()*60000 ).toLocaleString("en-US")}  (GMT+6)</div>
                             </div>
                         </div>
                         <div className="flex flex-wrap items-center gap-2">
