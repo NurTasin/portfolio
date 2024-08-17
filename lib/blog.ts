@@ -21,7 +21,12 @@ export interface BlogIndex {
 }
 
 export async function getBlogMetadataBySlug(slug: string, onError: Function | undefined = undefined) {
-    const response = await fetch(`${BLOG_URL}/blogs/index.json`,{cache:process.env.NODE_ENV==="production"?"default":"no-cache"});
+    const response = await fetch(`${BLOG_URL}/blogs/index.json`,{
+        cache:"force-cache",
+        next: {
+            tags: ["blog_index"]
+        }
+    });
     const index: BlogIndex[] = await response.json() as BlogIndex[];
     for (const blog of index) {
         if (blog.slug === slug) {
